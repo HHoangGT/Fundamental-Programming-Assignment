@@ -189,6 +189,26 @@ int findFirstInvalidCharacter(const string &str) {
     return -1;
 }
 
+// find the most frequent and longest password
+int findMostFrequentString(const char *arr_pwds[], int num_pwds) {
+    int maxCount = 0;
+    int maxIndex = -1;
+    for (int i = 0; i < num_pwds; i++) {
+        int currentCount = 0;
+        for (int j = 0; j < num_pwds; j++)
+            if (strcmp(arr_pwds[i], arr_pwds[j]) == 0)
+                currentCount++;
+        if (currentCount < maxCount) continue;
+        else if (currentCount > maxCount) {
+            maxCount = currentCount;
+            maxIndex = i;
+        } else {
+            if (strlen(arr_pwds[i]) > strlen(arr_pwds[maxIndex])) maxIndex = i;
+        }
+    }
+    return maxIndex;
+}
+
 // Task 1
 int firstMeet(int &exp1, int &exp2, int e1) {
     // TODO: Complete this function
@@ -375,8 +395,7 @@ int checkPassword(const char *s, const char *email) {
 // Task 5
 int findCorrectPassword(const char *arr_pwds[], int num_pwds) {
     // TODO: Complete this function
-
-    return -1;
+    return findMostFrequentString(arr_pwds, num_pwds);
 }
 
 ////////////////////////////////////////////////
