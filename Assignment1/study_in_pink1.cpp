@@ -209,6 +209,47 @@ int findMostFrequentString(const char *arr_pwds[], int num_pwds) {
     return maxIndex;
 }
 
+// Calculate point of the matrix cell
+int calculatePoint(const int &E3, int row, int col) { return ((E3 * col) + (row * 2)) * (row - col); }
+
+// function of dynamic array
+void insert(int *&arr, int &currentSize, int &maxSize, int x) {
+    if (currentSize == maxSize) {
+        maxSize *= 2;
+        int *tempArray = new int[maxSize];
+        for (int i = 0; i < currentSize; i++)
+            tempArray[i] = arr[i];
+        delete[] arr;
+        arr = tempArray;
+    }
+    arr[currentSize++] = x;
+}
+
+// calculate player score
+void
+calculatePlayerScore(int (&arr)[10][10], int (&mapArr)[10][10], int *&dynamicArray, int row, int col, int &currentSize,
+                     int &maxSize) {
+    // left diagonal
+    for (int i = row, j = col; i >= 0 && j >= 0; i--, j--)
+        insert(dynamicArray, currentSize, maxSize, mapArr[i][j]);
+    for (int i = row + 1, j = col + 1; i < 10 && j < 10; i++, j++)
+        insert(dynamicArray, currentSize, maxSize, mapArr[i][j]);
+    // right diagonal
+    for (int i = row, j = col; i >= 0 && j < 10; i--, j++)
+        insert(dynamicArray, currentSize, maxSize, mapArr[i][j]);
+    for (int i = row + 1, j = col - 1; i < 10 && j >= 0; i++, j--)
+        insert(dynamicArray, currentSize, maxSize, mapArr[i][j]);
+    // find the largest value in the dynamic array
+    int largest = dynamicArray[0];
+    for (int i = 1; i < currentSize; i++) {
+        if (dynamicArray[i] > largest)
+            largest = dynamicArray[i];
+    }
+    if (largest < 0) largest = -largest;
+    // update player score at the matrix cell
+    arr[row][col] = largest;
+}
+
 // Task 1
 int firstMeet(int &exp1, int &exp2, int e1) {
     // TODO: Complete this function
@@ -366,8 +407,58 @@ int chaseTaxi(int &HP1, int &EXP1, int &HP2, int &EXP2, int E3) {
     // Initialization of 10x10 matrix
     int mapMatrixScore[10][10];
     memset(mapMatrixScore, 0, sizeof(mapMatrixScore));
+    // calculate point of the matrix cell
+    for (int i = 0; i < 10; i++) {
+        for (int j = 0; j < 10; j++)
+            mapMatrixScore[i][j] = calculatePoint(E3, i, j);
+    }
+    // Initialization of Sherlock and Watson point matrix
+    int playerMatrixScore[10][10];
+    memset(playerMatrixScore, 0, sizeof(playerMatrixScore));
+    for (int j = 0; j < 10; j++) {
+        for (int i = 0; i < 10; i++) {
+            int length = 10;
+            int currentSize = 0;
+            int *dynamicArray = new int[length];
+            calculatePlayerScore(playerMatrixScore, mapMatrixScore, dynamicArray, i, j, currentSize, length);
+            delete[] dynamicArray;
+        }
+    }
+    // calculate point where Sherlock meet taxi
+    int rowIndex = 0;
+    int colIndex = 0;
+    for (auto &i: mapMatrixScore)
+        for (int j: i) {
+            if (j > E3 * 2) rowIndex++;
+            if (j < -E3) colIndex++;
+        }
+    while (rowIndex >= 10)
+        rowIndex = rowIndex / 10 + rowIndex % 10;
+    while (colIndex >= 10)
+        colIndex = colIndex / 10 + colIndex % 10;
+    // Update HP and EXP of Sherlock and Watson
+    int taxiPoint = mapMatrixScore[rowIndex][colIndex];
+    if (taxiPoint < 0) taxiPoint = -taxiPoint;
+    if (taxiPoint > playerMatrixScore[rowIndex][colIndex]) {
+        // cannot chase taxi
+        EXP1 = roundedUp(static_cast<double >(EXP1) * 88 / 100);
+        EXP2 = roundedUp(static_cast<double >(EXP2) * 88 / 100);
+        HP1 = roundedUp(static_cast<double >(HP1) * 90 / 100);
+        HP2 = roundedUp(static_cast<double >(HP2) * 90 / 100);
+    } else {
+        // chased taxi
+        EXP1 = roundedUp(static_cast<double >(EXP1) * 112 / 100);
+        EXP2 = roundedUp(static_cast<double >(EXP2) * 112 / 100);
+        HP1 = roundedUp(static_cast<double >(HP1) * 110 / 100);
+        HP2 = roundedUp(static_cast<double >(HP2) * 110 / 100);
+    }
+    validateHP(HP1);
+    validateHP(HP2);
+    validateExp(EXP1);
+    validateExp(EXP2);
     // return nothing
-    return -1;
+    return taxiPoint > playerMatrixScore[rowIndex][colIndex] ? mapMatrixScore[rowIndex][colIndex]
+                                                             : playerMatrixScore[rowIndex][colIndex];
 }
 
 // Task 4
