@@ -354,7 +354,7 @@ int traceLuggage(int &HP1, int &EXP1, int &M1, int E3) {
     int expense = 0;
     int orgM1 = M1; // variable to store the M1 when starting route 2
     // Do not do any activities if M1 = 0
-    if (M1 != 0)
+    if (M1 != 0) {
         if (!isEven(E3)) {
             // Case: E2 is an odd number
             while (!checkInvalidExpense(orgM1, expense, static_cast<double >(50) / 100)) {
@@ -364,6 +364,7 @@ int traceLuggage(int &HP1, int &EXP1, int &M1, int E3) {
             // Case: E2 is an even number
             activityWay2(HP1, EXP1, M1, expense, orgM1, false);
         }
+    }
     // Update HP1 and EXP1 at the end of WAY 2
     HP1 = roundedUp(static_cast<double >(HP1) * 83 / 100);
     EXP1 = roundedUp(static_cast<double >(EXP1) * 117 / 100);
