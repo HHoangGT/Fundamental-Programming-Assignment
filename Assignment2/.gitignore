@@ -1,6 +1,5 @@
 .idea
 cmake-build-*
 .DS_Store
-main.cpp
 .vs/
 out/
